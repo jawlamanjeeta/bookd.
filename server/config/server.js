@@ -16,10 +16,13 @@ startNoShowJob();
 app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(express.json());
 
-// Routes (will be added in Phase 4)
-// app.use('/api/auth', require('./routes/auth.routes'));
-// app.use('/api/bookings', require('./routes/booking.routes'));
-// app.use('/api/rooms', require('./routes/room.routes'));
+app.use('/api/auth', require('./routes/auth.routes'));
+app.use('/api/bookings', require('./routes/booking.routes'));
+app.use('/api/rooms', require('./routes/room.routes'));
+
+// Error handler — must be last
+const errorHandler = require('./middleware/errorHandler');
+app.use(errorHandler);
 
 app.get('/', (req, res) => res.send('Bookd API running'));
 
