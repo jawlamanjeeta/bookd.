@@ -9,6 +9,10 @@ const { initSocket } = require('./socket');
 dotenv.config();
 connectDB();
 
+const { startNoShowJob } = require('./services/noshow.service');
+// after connectDB();
+startNoShowJob();
+
 app.use(cors({ origin: process.env.CLIENT_URL }));
 app.use(express.json());
 
