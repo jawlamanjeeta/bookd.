@@ -18,6 +18,8 @@ app.use(express.json());
 app.use('/api/auth', require('./routes/auth.routes'));
 app.use('/api/bookings', require('./routes/booking.routes'));
 app.use('/api/rooms', require('./routes/room.routes'));
+app.use('/api/venues', require('./routes/venue.routes'));
+app.use('/api/venues/:venueId/resources', require('./routes/resource.routes'));
 
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
