@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getAllRooms, getMyBookings } from '../api/booking.api'
+import { getAllVenues, getMyBookings } from '../api/booking.api'
 import RoomCard from '../components/RoomCard'
 import useAuth from '../hooks/useAuth'
 import { formatSlot } from '../utils/formatSlot'
@@ -10,7 +10,7 @@ const Dashboard = () => {
   const [myBookings, setMyBookings] = useState([])
 
   useEffect(() => {
-    getAllRooms().then((res) => setRooms(res.data))
+    getAllVenues().then((res) => setRooms(res.data))
     getMyBookings().then((res) => setMyBookings(res.data))
   }, [])
 
