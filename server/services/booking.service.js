@@ -5,19 +5,13 @@ const { hasOverlap, generateAlternativeSlots } = require('../utils/dateTime.util
 /**
  * Check if a room has any conflicting bookings for the requested slot
  */
-const checkConflict = async (roomId, startTime, endTime, excludeBookingId = null) => {
+const checkConflict = async (resourceId, startTime, endTime, excludeBookingId = null) => {
   const query = {
-    room: roomId,
+    resource: resourceId,
     status: { $in: ['confirmed', 'pending'] },
-    $or: [
-      { startTime: { $lt: endTime }, endTime: { $gt: startTime } },
-    ],
+    $or: [{ startTime: { $lt: endTime }, endTime: { $gt: startTime } }],
   };
-
-  if (excludeBookingId) {
-    query._id = { $ne: excludeBookingId };
-  }
-
+  if (excludeBookingId) query._id = { $ne: excludeBookingId };
   const conflict = await Booking.findOne(query);
   return conflict;
 };
@@ -25,16 +19,14 @@ const checkConflict = async (roomId, startTime, endTime, excludeBookingId = null
 /**
  * Find up to 3 alternative available slots for a room
  */
-const suggestAlternativeSlots = async (roomId, requestedStart, requestedEnd) => {
+const suggestAlternativeSlots = async (resourceId, requestedStart, requestedEnd) => {
   const candidates = generateAlternativeSlots(requestedStart, requestedEnd, 6);
   const available = [];
-
   for (const slot of candidates) {
     if (available.length >= 3) break;
-    const conflict = await checkConflict(roomId, slot.startTime, slot.endTime);
+    const conflict = await checkConflict(resourceId, slot.startTime, slot.endTime);
     if (!conflict) available.push(slot);
   }
-
   return available;
 };
 
@@ -42,14 +34,13 @@ const suggestAlternativeSlots = async (roomId, requestedStart, requestedEnd) => 
  * Atomic booking creation using MongoDB transactions
  * Ensures zero double-bookings under concurrent requests
  */
-const createBookingAtomic = async (roomId, userId, startTime, endTime) => {
+const createBookingAtomic = async (resourceId, venueId, userId, startTime, endTime, guests = 1, totalPrice = 0, notes = '') => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
   try {
-    // Re-check conflict inside transaction
     const conflict = await Booking.findOne({
-      room: roomId,
+      resource: resourceId,
       status: { $in: ['confirmed', 'pending'] },
       $or: [{ startTime: { $lt: endTime }, endTime: { $gt: startTime } }],
     }).session(session);
@@ -57,20 +48,17 @@ const createBookingAtomic = async (roomId, userId, startTime, endTime) => {
     if (conflict) {
       await session.abortTransaction();
       session.endSession();
-
-      // Suggest alternatives
-      const suggestions = await suggestAlternativeSlots(roomId, startTime, endTime);
+      const suggestions = await suggestAlternativeSlots(resourceId, startTime, endTime);
       return { success: false, conflict: true, suggestions };
     }
 
     const booking = await Booking.create(
-      [{ room: roomId, user: userId, startTime, endTime, status: 'pending' }],
+      [{ resource: resourceId, venue: venueId, user: userId, startTime, endTime, guests, totalPrice, notes, status: 'pending' }],
       { session }
     );
 
     await session.commitTransaction();
     session.endSession();
-
     return { success: true, booking: booking[0] };
   } catch (err) {
     await session.abortTransaction();
