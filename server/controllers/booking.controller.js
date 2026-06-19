@@ -1,17 +1,28 @@
 const Booking = require('../models/Booking');
-const { createBookingAtomic, checkConflict } = require('../services/booking.service');
+const Resource = require('../models/Resource');
+const { createBookingAtomic } = require('../services/booking.service');
 const { emitAvailabilityUpdate } = require('../services/socket.service');
 
 const createBooking = async (req, res, next) => {
   try {
-    const { roomId, startTime, endTime } = req.body;
+    const { resourceId, startTime, endTime, guests, notes } = req.body;
     const userId = req.user._id;
 
+    const resource = await Resource.findById(resourceId);
+    if (!resource) return res.status(404).json({ message: 'Resource not found' });
+
+    const duration = (new Date(endTime) - new Date(startTime)) / (1000 * 60 * 60);
+    const totalPrice = duration * resource.pricePerHour;
+
     const result = await createBookingAtomic(
-      roomId,
+      resourceId,
+      resource.venue,
       userId,
       new Date(startTime),
-      new Date(endTime)
+      new Date(endTime),
+      guests,
+      totalPrice,
+      notes
     );
 
     if (!result.success) {
@@ -21,8 +32,7 @@ const createBooking = async (req, res, next) => {
       });
     }
 
-    // Notify all clients watching this room
-    emitAvailabilityUpdate(roomId, {
+    emitAvailabilityUpdate(resourceId, {
       type: 'new-booking',
       bookingId: result.booking._id,
     });
@@ -49,7 +59,7 @@ const confirmBooking = async (req, res, next) => {
     booking.confirmedAt = new Date();
     await booking.save();
 
-    emitAvailabilityUpdate(booking.room.toString(), {
+    emitAvailabilityUpdate(booking.resource.toString(), {
       type: 'booking-confirmed',
       bookingId: booking._id,
     });
@@ -75,7 +85,7 @@ const cancelBooking = async (req, res, next) => {
     booking.status = 'cancelled';
     await booking.save();
 
-    emitAvailabilityUpdate(booking.room.toString(), {
+    emitAvailabilityUpdate(booking.resource.toString(), {
       type: 'booking-cancelled',
       bookingId: booking._id,
     });
@@ -88,19 +98,24 @@ const cancelBooking = async (req, res, next) => {
 
 const getMyBookings = async (req, res, next) => {
   try {
-    const bookings = await Booking.find({ user: req.user._id })
-      .populate('room', 'name location capacity')
-      .sort({ startTime: 1 });
+    const { status } = req.query;
+    const filter = { user: req.user._id };
+    if (status) filter.status = status;
+
+    const bookings = await Booking.find(filter)
+      .populate('resource', 'name type capacity pricePerHour')
+      .populate('venue', 'name type location')
+      .sort({ startTime: -1 });
     res.json(bookings);
   } catch (err) {
     next(err);
   }
 };
 
-const getRoomBookings = async (req, res, next) => {
+const getResourceBookings = async (req, res, next) => {
   try {
     const bookings = await Booking.find({
-      room: req.params.roomId,
+      resource: req.params.resourceId,
       status: { $in: ['confirmed', 'pending'] },
     })
       .populate('user', 'name email')
@@ -111,12 +126,24 @@ const getRoomBookings = async (req, res, next) => {
   }
 };
 
+const getBookingById = async (req, res, next) => {
+  try {
+    const booking = await Booking.findById(req.params.id)
+      .populate('resource', 'name type capacity')
+      .populate('venue', 'name location')
+      .populate('user', 'name email');
+    if (!booking) return res.status(404).json({ message: 'Booking not found' });
+    res.json(booking);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   createBooking,
   confirmBooking,
   cancelBooking,
   getMyBookings,
-  getRoomBookings,
+  getResourceBookings,
+  getBookingById,
 };
-
-
