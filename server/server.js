@@ -20,6 +20,7 @@ app.use('/api/bookings', require('./routes/booking.routes'));
 app.use('/api/rooms', require('./routes/room.routes'));
 app.use('/api/venues', require('./routes/venue.routes'));
 app.use('/api/venues/:venueId/resources', require('./routes/resource.routes'));
+app.use('/api/dashboard', require('./routes/dashboard.routes'));
 
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
