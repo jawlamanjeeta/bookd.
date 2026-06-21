@@ -21,6 +21,12 @@ app.use('/api/rooms', require('./routes/room.routes'));
 app.use('/api/venues', require('./routes/venue.routes'));
 app.use('/api/venues/:venueId/resources', require('./routes/resource.routes'));
 app.use('/api/dashboard', require('./routes/dashboard.routes'));
+app.use('/api/notifications', require('./routes/notification.routes'));
+app.use('/api/waitlist', require('./routes/waitlist.routes'));
+app.use('/api/favorites', require('./routes/favorite.routes'));
+app.use('/api/reviews', require('./routes/review.routes'));
+app.use('/api/analytics', require('./routes/analytics.routes'));
+
 
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
