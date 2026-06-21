@@ -61,4 +61,36 @@ const deleteVenue = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllVenues, getVenueById, createVenue, updateVenue, deleteVenue };
+const getMyVenues = async (req, res, next) => {
+  try {
+    const venues = await Venue.find({ owner: req.user._id, isActive: true });
+    res.json(venues);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const updateVenueSettings = async (req, res, next) => {
+  try {
+    const { name, description, openingHours, rules, images } = req.body;
+    const venue = await Venue.findOneAndUpdate(
+      { _id: req.params.id, owner: req.user._id },
+      { name, description, openingHours, rules, images },
+      { new: true, runValidators: true }
+    );
+    if (!venue) return res.status(404).json({ message: 'Venue not found or unauthorized' });
+    res.json(venue);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = {
+  getAllVenues,
+  getVenueById,
+  createVenue,
+  updateVenue,
+  deleteVenue,
+  getMyVenues,
+  updateVenueSettings,
+};
