@@ -1,3 +1,4 @@
+import LiveFeed from '../components/LiveFeed'
 import { useEffect, useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import {
@@ -129,7 +130,11 @@ const OwnerDashboard = () => {
                 <Line data={peakData} options={chartOptions()} />
               </div>
             </div>
-
+            {/* Live Feed */}
+            <div style={{ marginBottom: '2.5rem' }}>
+               <LiveFeed resourceIds={[]} />
+            </div>
+            
             {/* Quick Links */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
               {[
