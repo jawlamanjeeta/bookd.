@@ -13,6 +13,10 @@ import OwnerDashboard from './pages/OwnerDashboard'
 import ResourceManagement from './pages/ResourceManagement'
 import ReservationManagement from './pages/ReservationManagement'
 import VenueSettings from './pages/VenueSettings'
+import Notifications from './pages/Notifications'
+import Favorites from './pages/Favorites'
+import CalendarView from './pages/CalendarView'
+import AnalyticsDashboard from './pages/AnalyticsDashboard'
 
 const App = () => {
   return (
@@ -32,6 +36,10 @@ const App = () => {
           <Route path="/dashboard/reservations" element={<ProtectedRoute><ReservationManagement /></ProtectedRoute>} />
           <Route path="/dashboard/settings" element={<ProtectedRoute><VenueSettings /></ProtectedRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="/notifications" element={<ProtectedRoute><Notifications /></ProtectedRoute>} />
+          <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
+          <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
+          <Route path="/dashboard/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
