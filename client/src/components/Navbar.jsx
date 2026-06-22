@@ -29,6 +29,8 @@ const Navbar = () => {
             <Link to="/my-bookings" className="btn-ghost">Bookings</Link>
             <Link to="/favorites" className="btn-ghost">Saved</Link>
             <Link to="/calendar" className="btn-ghost">Calendar</Link>
+            <Link to="/recommendations" className="btn-ghost">For You</Link>
+            <Link to="/insights" className="btn-ghost">Insights</Link>
             <Link to="/notifications" className="btn-ghost" style={{ position: 'relative' }}>
               🔔
               {unread > 0 && (
