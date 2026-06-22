@@ -15,7 +15,7 @@ const BookingSuccess = () => {
           <div className="success-icon">✓</div>
           <h1>Booking Confirmed!</h1>
           <p>Your reservation is confirmed. See you there!</p>
-
+      
           {booking && (
             <div className="booking-details">
               <div className="booking-detail-row">
@@ -48,7 +48,14 @@ const BookingSuccess = () => {
               </div>
             </div>
           )}
-
+          {booking?._id && (
+            <Link
+               to={`/qr/${booking._id}`}
+               style={{ display: 'block', textAlign: 'center', marginBottom: '1rem', padding: '0.75rem', background: 'var(--accent-glow)', border: '1px solid rgba(124,110,248,0.3)', borderRadius: 'var(--radius-sm)', color: 'var(--accent)', fontFamily: 'var(--font-mono)', fontSize: '0.85rem' }}
+            >
+               📱 View QR Check-In Pass
+            </Link>
+            )}
           <div style={{ display: 'flex', gap: '0.75rem' }}>
             <Link to="/my-bookings" className="btn-secondary" style={{ flex: 1, textAlign: 'center', padding: '0.75rem' }}>
               My Bookings
