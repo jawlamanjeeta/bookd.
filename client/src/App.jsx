@@ -17,6 +17,10 @@ import Notifications from './pages/Notifications'
 import Favorites from './pages/Favorites'
 import CalendarView from './pages/CalendarView'
 import AnalyticsDashboard from './pages/AnalyticsDashboard'
+import FloorPlan from './pages/FloorPlan'
+import QRCheckIn from './pages/QRCheckIn'
+import Recommendations from './pages/Recommendations'
+import Insights from './pages/Insights'
 
 const App = () => {
   return (
@@ -40,6 +44,10 @@ const App = () => {
           <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
           <Route path="/calendar" element={<ProtectedRoute><CalendarView /></ProtectedRoute>} />
           <Route path="/dashboard/analytics" element={<ProtectedRoute><AnalyticsDashboard /></ProtectedRoute>} />
+          <Route path="/floor-plan/:venueId" element={<FloorPlan />} />
+          <Route path="/qr/:bookingId" element={<ProtectedRoute><QRCheckIn /></ProtectedRoute>} />
+          <Route path="/recommendations" element={<ProtectedRoute><Recommendations /></ProtectedRoute>} />
+          <Route path="/insights" element={<ProtectedRoute><Insights /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
