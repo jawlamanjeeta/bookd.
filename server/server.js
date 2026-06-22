@@ -26,7 +26,10 @@ app.use('/api/waitlist', require('./routes/waitlist.routes'));
 app.use('/api/favorites', require('./routes/favorite.routes'));
 app.use('/api/reviews', require('./routes/review.routes'));
 app.use('/api/analytics', require('./routes/analytics.routes'));
-
+app.use('/api/floorplan', require('./routes/floorplan.routes'));
+app.use('/api/qr', require('./routes/qr.routes'));
+app.use('/api/recommendations', require('./routes/recommendations.routes'));
+app.use('/api/insights', require('./routes/insights.routes'));
 
 const errorHandler = require('./middleware/errorHandler');
 app.use(errorHandler);
