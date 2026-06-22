@@ -1,8 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getVenueById, getResourcesByVenue } from '../api/booking.api'
 import Navbar from '../components/Navbar'
 import useAuth from '../hooks/useAuth'
+import ReviewSection from '../components/ReviewSection'
+import { addFavorite, removeFavorite, checkFavorite } from '../api/advanced.api'
 
 const TYPE_ICONS = {
   restaurant: '🍽️', meeting_room: '🏢', sports_court: '🎾', study_room: '📚',
@@ -16,22 +18,35 @@ const VenueDetail = () => {
   const [resources, setResources] = useState([])
   const [selected, setSelected] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [isFavorite, setIsFavorite] = useState(false)
 
   useEffect(() => {
     Promise.all([getVenueById(id), getResourcesByVenue(id)])
       .then(([vRes, rRes]) => { setVenue(vRes.data); setResources(rRes.data) })
       .catch(console.error)
       .finally(() => setLoading(false))
-  }, [id])
 
-  if (loading) return <><Navbar /><div className="loading">Loading venue...</div></>
-  if (!venue) return <><Navbar /><div className="loading">Venue not found</div></>
+    if (user) {
+      checkFavorite(id).then((res) => setIsFavorite(res.data.isFavorite)).catch(console.error)
+    }
+  }, [id])
 
   const handleBook = () => {
     if (!user) return navigate('/login')
     if (!selected) return alert('Please select a resource to book')
     navigate(`/booking/${selected._id}`)
   }
+
+  const handleFavorite = async () => {
+    if (!user) return navigate('/login')
+    try {
+      if (isFavorite) { await removeFavorite(id); setIsFavorite(false) }
+      else { await addFavorite(id); setIsFavorite(true) }
+    } catch (err) { console.error(err) }
+  }
+
+  if (loading) return <><Navbar /><div className="loading">Loading venue...</div></>
+  if (!venue) return <><Navbar /><div className="loading">Venue not found</div></>
 
   return (
     <>
@@ -49,9 +64,22 @@ const VenueDetail = () => {
               <span className="venue-meta-item">★ {venue.rating?.toFixed(1) || '4.5'}</span>
             </div>
           </div>
-          <button className="btn-primary" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }} onClick={handleBook}>
-            Book Now
-          </button>
+          <div style={{ display: 'flex', gap: '0.75rem' }}>
+            <button
+              onClick={handleFavorite}
+              style={{
+                background: isFavorite ? 'rgba(240,165,0,0.1)' : 'transparent',
+                border: `1.5px solid ${isFavorite ? 'var(--amber)' : 'var(--border)'}`,
+                color: isFavorite ? 'var(--amber)' : 'var(--text-muted)',
+                padding: '0.85rem 1.25rem', borderRadius: 'var(--radius-sm)',
+              }}
+            >
+              {isFavorite ? '♥ Saved' : '♡ Save'}
+            </button>
+            <button className="btn-primary" style={{ padding: '0.85rem 2rem', fontSize: '1rem' }} onClick={handleBook}>
+              Book Now
+            </button>
+          </div>
         </div>
 
         {venue.description && (
@@ -100,6 +128,8 @@ const VenueDetail = () => {
             </button>
           </div>
         )}
+
+        <ReviewSection venueId={id} />
       </div>
     </>
   )
