@@ -21,7 +21,7 @@ const Navbar = () => {
 
   return (
     <nav className="nav">
-      <Link to="/" className="nav-logo">Book<span>d</span></Link>
+      <Link to="/" className="nav-logo" style={{ textTransform: 'lowercase' }}>bookd<span>.</span></Link>
       <div className="nav-links">
         <Link to="/venues" className="btn-ghost">Explore</Link>
         {user ? (
